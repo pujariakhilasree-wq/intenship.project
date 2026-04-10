@@ -1,0 +1,53 @@
+# Simple Recommendation System (Content-Based Filtering)
+
+import pandas as pd
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Step 1: Create dataset
+data = {
+    'title': [
+        'Inception', 'Interstellar', 'The Dark Knight',
+        'Avengers', 'Iron Man', 'Thor',
+        'Titanic', 'The Notebook', 'La La Land'
+    ],
+    'genre': [
+        'Sci-Fi Thriller', 'Sci-Fi Drama', 'Action Crime',
+        'Action Superhero', 'Action Superhero', 'Action Fantasy',
+        'Romance Drama', 'Romance Drama', 'Romance Musical'
+    ]
+}
+
+df = pd.DataFrame(data)
+
+# Step 2: Convert text data into vectors
+cv = CountVectorizer()
+matrix = cv.fit_transform(df['genre'])
+
+# Step 3: Compute similarity
+similarity = cosine_similarity(matrix)
+
+# Step 4: Recommendation function
+def recommend(movie_name):
+    if movie_name not in df['title'].values:
+        return "Movie not found!"
+
+    index = df[df['title'] == movie_name].index[0]
+    distances = list(enumerate(similarity[index]))
+    
+    # Sort based on similarity score
+    movies_list = sorted(distances, key=lambda x: x[1], reverse=True)[1:4]
+
+    recommendations = []
+    for i in movies_list:
+        recommendations.append(df.iloc[i[0]].title)
+
+    return recommendations
+
+# Step 5: Test the system
+movie = input("Enter a movie name: ")
+result = recommend(movie)
+
+print("\nRecommended Movies:")
+for r in result:
+    print(r)
